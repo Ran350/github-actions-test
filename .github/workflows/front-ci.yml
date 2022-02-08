@@ -1,0 +1,39 @@
+name: Front Code Check
+
+on:
+  push:
+    paths:
+      - 'front/**'
+  pull_request:
+    paths:
+      - 'front/**'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install Dependencies
+        working-directory: ./front
+        run: npm install
+
+      - name: Code Check
+        working-directory: ./front
+        run: npm run lint
